@@ -1,4 +1,4 @@
-package barrel
+package barreldb
 
 import "errors"
 

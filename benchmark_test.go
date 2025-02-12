@@ -1,4 +1,4 @@
-package barrel_test
+package barreldb_test
 
 import (
 	"os"
