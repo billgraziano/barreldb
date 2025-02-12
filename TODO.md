@@ -1,4 +1,10 @@
-## TODO
+# TODO
+
+## Fork
+* [ ] Increase the timestamp to 64-bit to match time.Unix()?  And maybe round to one second?
+* [x] Add function to get all records with a specific prefix sorted by the keys.  RangePrefix(prefix) ([]Record, error)
+* [x] Add a registry for lables|types
+
 
 These are my rough notes about WIP implementations and backlog.
 

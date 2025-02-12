@@ -153,3 +153,43 @@ func TestAPI(t *testing.T) {
 		assert.NoError(err)
 	})
 }
+
+func TestPrefix(t *testing.T) {
+	var (
+		brl    = &Barrel{}
+		assert = assert.New(t)
+	)
+
+	// Create a temp directory for running tests.
+	tmpDir, err := os.MkdirTemp("", "barreldb")
+	defer os.RemoveAll(tmpDir)
+
+	assert.NoError(err)
+	t.Run("TestPrefix", func(t *testing.T) {
+		brl, err = Init(WithDir(tmpDir))
+		assert.NoError(err)
+		assert.NotEmpty(brl)
+
+		for i := 127; i < 130; i++ {
+			key := fmt.Sprintf("/s1/abc/%d", i)
+			err = brl.Put(key, []byte{1, 2, 3})
+			assert.NoError(err)
+
+			key = fmt.Sprintf("/s1/def/%d", i)
+			err = brl.Put(key, []byte{1, 2, 3})
+			assert.NoError(err)
+		}
+		assert.Equal(6, brl.Len())
+		keys := brl.keysForPrefix("/S1/aBc/")
+		assert.Equal(3, len(keys))
+
+		records, err := brl.Range("/s1/def/")
+		assert.NoError(err)
+		assert.Equal(3, len(records))
+	})
+	t.Run("Close", func(t *testing.T) {
+		err = brl.Shutdown()
+		assert.NoError(err)
+	})
+
+}

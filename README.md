@@ -6,9 +6,9 @@
 
 _A disk based key-value store based on [Bitcask](https://en.wikipedia.org/wiki/Bitcask)_.
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/mr-karan/barreldb.svg)](https://pkg.go.dev/github.com/mr-karan/barreldb)
-[![Go Report Card](https://goreportcard.com/badge/github.com/mr-karan/barreldb)](https://goreportcard.com/report/github.com/mr-karan/barreldb)
-[![GitHub Actions](https://github.com/mr-karan/barreldb/actions/workflows/release.yml/badge.svg)](https://github.com/mr-karan/barreldb/actions/workflows/release.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/billgraziano/barreldb.svg)](https://pkg.go.dev/github.com/billgraziano/barreldb)
+[![Go Report Card](https://goreportcard.com/badge/github.com/billgraziano/barreldb)](https://goreportcard.com/report/github.com/billgraziano/barreldb)
+
 
 ---
 
@@ -40,7 +40,7 @@ You can refer to [Writing a disk-based key-value store in Golang](https://mrkara
 
 ```go
 import (
-	"github.com/mr-karan/barreldb"
+	"github.com/billgraziano/barreldb"
 )
 
 barrel, _ := barrel.Init(barrel.WithDir("data/"))
@@ -101,13 +101,13 @@ go test -bench=. -benchmem ./...
 HELLO
 goos: linux
 goarch: amd64
-pkg: github.com/mr-karan/barreldb
+pkg: github.com/billgraziano/barreldb
 cpu: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz
 BenchmarkPut/DisableSync-8                385432              3712 ns/op        1103.48 MB/s          88 B/op          4 allocs/op
 BenchmarkPut/AlwaysSync-8                    222           5510563 ns/op           0.74 MB/s         115 B/op          4 allocs/op
 BenchmarkGet-8                            840627              1304 ns/op        3142.20 MB/s        4976 B/op          5 allocs/op
 PASS
-ok      github.com/mr-karan/barreldb 10.751s
+ok      github.com/billgraziano/barreldb 10.751s
 ```
 
 Using `redis-benchmark`:

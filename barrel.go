@@ -3,12 +3,13 @@ package barrel
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"sync"
 	"time"
 
-	"github.com/mr-karan/barreldb/internal/datafile"
+	"github.com/billgraziano/barreldb/internal/datafile"
 	"github.com/zerodha/logf"
 )
 
@@ -27,7 +28,9 @@ type Barrel struct {
 	keydir KeyDir                     // In-memory hashmap of all active keys.
 	df     *datafile.DataFile         // Active datafile.
 	stale  map[int]*datafile.DataFile // Map of older datafiles with their IDs.
-	flockF *os.File                   //Lockfile to prevent multiple write access to same datafile.
+	// flockF *os.File                   // Lockfile to prevent multiple write access to same datafile.
+
+	labels map[string]bool // registry of types so we don't have duplicates
 }
 
 // initLogger initializes logger instance.
@@ -50,10 +53,10 @@ func Init(cfg ...Config) (*Barrel, error) {
 	}
 
 	var (
-		lo     = initLogger(opts.debug)
-		index  = 0
-		flockF *os.File
-		stale  = map[int]*datafile.DataFile{}
+		lo    = initLogger(opts.debug)
+		index = 0
+		//flockF *os.File
+		stale = map[int]*datafile.DataFile{}
 	)
 
 	// Load existing datafiles
@@ -83,18 +86,18 @@ func Init(cfg ...Config) (*Barrel, error) {
 	}
 
 	// If not running in a read only mode then create a lockfile to ensure only one process writes to the db directory.
-	if !opts.readOnly {
-		// Check if a lockfile already exists.
-		lockPath := filepath.Join(opts.dir, LOCKFILE)
-		if exists(lockPath) {
-			return nil, ErrLocked
-		} else {
-			flockF, err = createFlockFile(lockPath)
-			if err != nil {
-				return nil, fmt.Errorf("error creating lockfile: %w", err)
-			}
-		}
-	}
+	// if !opts.readOnly {
+	// 	// Check if a lockfile already exists.
+	// 	lockPath := filepath.Join(opts.dir, LOCKFILE)
+	// 	if exists(lockPath) {
+	// 		return nil, ErrLocked
+	// 	} else {
+	// 		flockF, err = createFlockFile(lockPath)
+	// 		if err != nil {
+	// 			return nil, fmt.Errorf("error creating lockfile: %w", err)
+	// 		}
+	// 	}
+	// }
 
 	// Initialise a db store.
 	df, err := datafile.New(opts.dir, index)
@@ -112,15 +115,16 @@ func Init(cfg ...Config) (*Barrel, error) {
 			return nil, fmt.Errorf("error populating hashtable from hints file: %w", err)
 		}
 	}
-
+	//labelMap := make(map[string]bool)
 	// Initialise barrel.
 	barrel := &Barrel{
-		opts:   opts,
-		lo:     lo,
-		df:     df,
-		stale:  stale,
-		flockF: flockF,
+		opts:  opts,
+		lo:    lo,
+		df:    df,
+		stale: stale,
+		//flockF: flockF,
 		keydir: keydir,
+		labels: make(map[string]bool),
 		bufPool: sync.Pool{New: func() any {
 			return bytes.NewBuffer([]byte{})
 		}},
@@ -169,12 +173,12 @@ func (b *Barrel) Shutdown() error {
 	}
 
 	// Cleanup the lock file.
-	if !b.opts.readOnly {
-		if err := destroyFlockFile(b.flockF); err != nil {
-			b.lo.Error("error destroying lock file", "error", err)
-			return err
-		}
-	}
+	// if !b.opts.readOnly {
+	// 	if err := destroyFlockFile(b.flockF); err != nil {
+	// 		b.lo.Error("error destroying lock file", "error", err)
+	// 		return err
+	// 	}
+	// }
 
 	return nil
 }
@@ -261,6 +265,47 @@ func (b *Barrel) Delete(k string) error {
 
 	b.lo.Debug("deleting key", "key", k)
 	return b.delete(k)
+}
+
+// Range returns all the Records for a prefix of keys in order
+// of the key
+func (b *Barrel) Range(prefix string) ([]Record, error) {
+	b.Lock()
+	defer b.Unlock()
+
+	keys := b.keysForPrefix(prefix)
+	if len(keys) == 0 {
+		return []Record{}, nil
+	}
+	sort.Strings(keys)
+	records := make([]Record, 0, len(keys))
+	for _, k := range keys {
+		r, err := b.get(k)
+		if r.isExpired() {
+			continue
+		}
+		if !r.isValidChecksum() {
+			continue
+		}
+		if err != nil {
+			b.lo.Error(err.Error())
+			continue
+		}
+		records = append(records, r)
+	}
+	return records, nil
+}
+
+func (b *Barrel) keysForPrefix(prefix string) []string {
+	keys := make([]string, 0)
+
+	for k := range b.keydir {
+		if strings.HasPrefix(strings.ToLower(k), strings.ToLower(prefix)) {
+			keys = append(keys, k)
+		}
+	}
+
+	return keys
 }
 
 // List iterates over all keys and returns the list of keys.

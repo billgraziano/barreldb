@@ -6,7 +6,7 @@ import (
 	"hash/crc32"
 	"time"
 
-	"github.com/mr-karan/barreldb/internal/datafile"
+	"github.com/billgraziano/barreldb/internal/datafile"
 )
 
 func (b *Barrel) get(k string) (Record, error) {

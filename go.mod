@@ -1,4 +1,4 @@
-module github.com/mr-karan/barreldb
+module github.com/billgraziano/barreldb
 
 go 1.19
 
@@ -8,7 +8,6 @@ require (
 	github.com/stretchr/testify v1.8.0
 	github.com/tidwall/redcon v1.6.0
 	github.com/zerodha/logf v0.5.5
-	golang.org/x/sys v0.3.0
 )
 
 require (
@@ -21,5 +20,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/tidwall/btree v1.6.0 // indirect
 	github.com/tidwall/match v1.1.1 // indirect
+	golang.org/x/sys v0.3.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

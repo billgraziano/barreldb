@@ -14,4 +14,6 @@ var (
 	ErrNoKey      = errors.New("invalid key: key is either deleted or expired or unset")
 
 	ErrLargeValue = errors.New("invalid value: size cannot be more than 4294967296 bytes")
+
+	ErrDuplicateLabel = errors.New("duplicate label")
 )

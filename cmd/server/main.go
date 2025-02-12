@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	barrel "github.com/mr-karan/barreldb"
+	barrel "github.com/billgraziano/barreldb"
 	"github.com/tidwall/redcon"
 	"github.com/zerodha/logf"
 )

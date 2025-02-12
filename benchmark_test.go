@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	barrel "github.com/mr-karan/barreldb"
+	barrel "github.com/billgraziano/barreldb"
 )
 
 func BenchmarkPut(b *testing.B) {

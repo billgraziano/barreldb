@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/mr-karan/barreldb/internal/datafile"
+	"github.com/billgraziano/barreldb/internal/datafile"
 )
 
 // ExamineFileSize checks for file size at a periodic interval.
